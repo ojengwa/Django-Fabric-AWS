@@ -52,7 +52,9 @@ configure_instance = [
   
   # Add AWS credentials to the a config file so that boto can access S3
   {"action":"put_template", "params":{"template":"%(FAB_CONFIG_PATH)s/templates/boto.cfg",
-                                       "destination":"/etc/boto.cfg"}},
+                                       "destination":"/home/%(SERVER_USERNAME)s/boto.cfg"}},
+  {"action":"sudo", "params":"mv /home/%(SERVER_USERNAME)s/boto.cfg /etc/boto.cfg"},
+  
   # virtualenvwrapper
   {"action":"sudo", "params":"mkdir %(VIRTUALENV_DIR)s", "message":"Configuring virtualenvwrapper"},
   {"action":"sudo", "params":"chown -R %(SERVER_USERNAME)s: %(VIRTUALENV_DIR)s"},
