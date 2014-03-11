@@ -26,7 +26,7 @@ This was based on [Fabulous](https://github.com/gcollazo/Fabulous) by [Giovanni 
     * **dev.py** for your local Django settings
     * **prod.py** for your server Django settings
 * At the top of both **dev.py** and **prod.py** add the line `from <django_project_name>.settings.common import *`
-* Change the `os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<django_project_name>.settings")` in both wsgi.py and manage.py to `os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<django_project_name>.settings.prod")`
+* Change the `os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<django_project_name>.settings")` in both wsgi.py and manage.py to `os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<django_project_name>.settings.prod")`. This means that the project with default to the production settings, however you can run it locally using `python manage.py runserver --settings=<django_project_name>.settings.dev`
 * [Setup a set of SSH keys](https://confluence.atlassian.com/display/BITBUCKET/Set+up+SSH+for+Git) for the bitbucket account where your repo is hosted
 * Provision an S3 bucket for the staticfiles and add the following to **settings/prod.py**
     
