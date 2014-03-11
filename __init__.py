@@ -1,1 +1,1 @@
-from fabulous import *
+from django_fabric_aws import *

@@ -1,51 +1,68 @@
-![Fabulous Logo](http://i.imgur.com/IMyr4.png "Fabulous")
-### Deploy django apps to Amazon EC2 with ONE command
+# Django Fabric AWS
+### A Fabric script to manage a Django deployment on Amazon AWS
 
-First clone the project
+This fabfile along with the provided templates can spawn EC2 instances, install and configure a stateless Django stack on them (nginx + gunicorn with Amazon S3 for staticfiles). 
+
+Furthermore it can update your instances from a git repo stored on bitbucket [private repos are free on bitbucket so you can run private stuff on your server]
+
+## Author
+[Ashok Fernandez](https://github.com/ashokfernandez/)
+
+## Acknowledgements
+This was based on [Fabulous](https://github.com/gcollazo/Fabulous) by [Giovanni Collazo](https://github.com/gcollazo).
+
+
+## Setup
+ * Download this repo and drag the **fabfile** folder into the root directory of your Django project. 
+ * cd into the folder and run `pip install -r requirements.txt`
+ * Create a folder in the root directory of your Django project called **requirements** that has three pip requirements files in it:
+    * **common.txt** for all your common python dependancies between the server and local
+    * **dev.txt** for your local python dependancies
+    * **prod.txt** for your server python dependancies
+
+* Create a folder where the settings.py of your Django project is located called **settings** that has four Python files in it
+    * **__init__.py**
+    * **common.py** for all your common Django settings
+    * **dev.py** for your local Django settings
+    * **prod.py** for your server Django settings
+* At the top of both **dev.py** and **prod.py** add the line `from <django_project_name>.settings.common import *`
+* Change the `os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<django_project_name>.settings")` in both wsgi.py and manage.py to `os.environ.setdefault("DJANGO_SETTINGS_MODULE", "<django_project_name>.settings.prod")`
+* [Setup a set of SSH keys](https://confluence.atlassian.com/display/BITBUCKET/Set+up+SSH+for+Git) for the bitbucket account where your repo is hosted
+* Provision an S3 bucket for the staticfiles and add the following to **settings/prod.py**
     
-    $ git clone https://github.com/gcollazo/Fabulous.git fabfile
+      INSTALLED_APPS += ('storages',)
+      AWS_STORAGE_BUCKET_NAME = "<s3_staticfiles_bucket_name>"
+      STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+      S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+      STATIC_URL = S3_URL
+* Fill out the details in **fabfile/project_conf.py**
 
-Just change the values of __fabulous_conf.py__ and optionally __cookbook.py__:    
+## Commands
+After all that work you can now run these commands which will execute across all your EC2 instances
 
-    $ fab ulous
-    
-__Make sure the cloned folder is called *fabfile*__
+- `fab spawn instance` 
+    - Spawns a new EC2 instance (as definied in project_conf.py) and return's it's public dns. This takes around 8 minutes to complete.
 
-Fabulous will create an EC2 instance, install everything and deploy a blank django app. __All in less than 2 minutes__.
+- `fab update_packages`
+    - Updates the python packages on the server to match those found in requirements/common.txt and 
+      requirements/prod.txt
 
-#### Process
-* Create server on EC2
-* Wait a few seconds for server to boot
-* Install packages
-* Create virtualenv
-* Install django in virtualenv
-* Install gunicorn in virtualenv
-* Setup and run supervisor
+- `fab deploy`
+    - Pulls the latest commit from the master branch on the server, collects the static files, syncs the db and                   
+      restarts the server
 
-#### The setup
-* nginx
-* gunicorn
-* supervisor
-* memcached
-* virtualenv
-* virtualenvwrapper
-* git
+- `fab reload_gunicorn`
+    - Pushes the gunicorn startup script to the servers and restarts the gunicorn process, use this if you 
+      have made changes to templates/start_gunicorn.bash
 
-#### Requirements
-* Python 2.6.1
-* Fabric 0.9.3
-* Boto 2.0b4
+- `fab reload_nginx`
+    - Pushes the nginx config files to the servers and restarts the nginx, use this if you 
+      have made changes to templates/nginx-app-proxy or templates/nginx.conf
 
-#### Credits
-The unicorn logo is a courtesy of [Mac McRae](http://macmcrae.com/ "Mac McRae"). You can find his work at [http://macmcrae.com/](http://macmcrae.com/ "Mac McRae Illustration").
+- `fab reload_supervisor`
+    - Pushes the supervisor config files to the servers and restarts the supervisor, use this if you 
+      have made changes to templates/supervisord-init or templates/supervisord.conf
 
-#### License
-The MIT License (MIT)
-
-Copyright (c) 2011 Giovanni Collazo
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+- `fab manage:command="management command"`
+    - Runs a python manage.py command on the server. To run this command we need to specify an argument, eg for syncdb
+      type the command -> fab manage:command="syncdb --no-input"

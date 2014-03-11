@@ -1,11 +1,19 @@
 upstream app_server {
-  server 127.0.0.1:8000 fail_timeout=0;
+  # Bindings to the Gunicorn server
+  server 127.0.0.1:8002 fail_timeout=0;
 }
 
 server {
+  
+  # Access Logs
+  access_log %(PROJECT_PATH)s/logs/nginx-access.log;
+  error_log %(PROJECT_PATH)s/logs/nginx-error.log;
+
+
   listen 80 default;
   client_max_body_size 4G;
-  server_name %(DOMAINS)s;
+  # server_name %(DOMAINS)s;
+  server_name _;
   keepalive_timeout 5;
   root %(PROJECT_PATH)s;
 

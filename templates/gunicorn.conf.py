@@ -5,5 +5,5 @@ def numCPUs():
         raise RuntimeError("No sysconf detected.")
     return os.sysconf("SC_NPROCESSORS_ONLN")
 
-bind = "127.0.0.1:8000"
+bind = "127.0.0.1:8002"
 workers = numCPUs() * 2 + 1
