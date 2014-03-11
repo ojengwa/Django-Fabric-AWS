@@ -30,11 +30,12 @@ This was based on [Fabulous](https://github.com/gcollazo/Fabulous) by [Giovanni 
 * [Setup a set of SSH keys](https://confluence.atlassian.com/display/BITBUCKET/Set+up+SSH+for+Git) for the bitbucket account where your repo is hosted
 * Provision an S3 bucket for the staticfiles and add the following to **settings/prod.py**
     
-      INSTALLED_APPS += ('storages',)
-      AWS_STORAGE_BUCKET_NAME = "<s3_staticfiles_bucket_name>"
-      STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-      S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-      STATIC_URL = S3_URL
+        INSTALLED_APPS += ('storages',)
+        AWS_STORAGE_BUCKET_NAME = "<s3_staticfiles_bucket_name>"
+        STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+        S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+        STATIC_URL = S3_URL
+
 * Fill out the details in **fabfile/project_conf.py**
 
 ## Commands
