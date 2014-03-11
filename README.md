@@ -12,13 +12,17 @@ Furthermore it can update your instances from a git repo stored on bitbucket [pr
 This was based on [Fabulous](https://github.com/gcollazo/Fabulous) by [Giovanni Collazo](https://github.com/gcollazo).
 
 
-## Setup
+## Installation
  * Download this repo and drag the **fabfile** folder into the root directory of your Django project. 
  * cd into the folder and run `pip install -r requirements.txt`
+
+## Setting up Your Django Project
+See an [example here](https://github.com/ashokfernandez/Django-Fabric-AWS---amazon_app) of how to setup your Django project using the following instructions.
+
  * Create a folder in the root directory of your Django project called **requirements** that has three pip requirements files in it:
-    * **common.txt** for all your common python dependancies between the server and local
+    * **common.txt** for all your common python dependancies between the server and local (add Django to this)
     * **dev.txt** for your local python dependancies
-    * **prod.txt** for your server python dependancies
+    * **prod.txt** for your server python dependancies (add boto, django-storages and psycopg2 to this)
 
 * Create a folder where the settings.py of your Django project is located called **settings** that has four Python files in it
     * **__init__.py**
