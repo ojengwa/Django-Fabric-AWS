@@ -96,7 +96,7 @@ configure_instance = [
   {"action":"virtualenv", "params":"pip install gunicorn",
     "message":"Installing gunicorn"},
   
-  # CREATING PROJECT DIR - This should be done by Git
+  # Clone the git repo
   {"action":"run", "params":"git clone %(BITBUCKET_REPO)s %(PROJECT_PATH)s"},
   
   {"action":"put", "params":{"file":"%(FAB_CONFIG_PATH)s/templates/gunicorn.conf.py",
@@ -109,6 +109,10 @@ configure_instance = [
   {"action":"put_template", "params":{"template":"%(FAB_CONFIG_PATH)s/templates/start_gunicorn.bash",
                                        "destination":"%(PROJECT_PATH)s/start_gunicorn.bash"}},
   {"action":"sudo", "params":"chmod +x %(PROJECT_PATH)s/start_gunicorn.bash"},        
+
+  # Install the requirements from the pip requirements files
+  {"action":"virtualenv", "params":"pip install -r %(PROJECT_PATH)s/requirements/common.txt --upgrade"},
+  {"action":"virtualenv", "params":"pip install -r %(PROJECT_PATH)s/requirements/prod.txt --upgrade"},
 
   # nginx
   {"action":"put", "params":{"file":"%(FAB_CONFIG_PATH)s/templates/nginx.conf",
@@ -124,6 +128,10 @@ configure_instance = [
   {"action":"sudo", "params":"ln -s /etc/nginx/sites-available/%(PROJECT_NAME)s /etc/nginx/sites-enabled/%(PROJECT_NAME)s"},
   {"action":"sudo", "params":"chown root:root /etc/nginx/sites-available/%(PROJECT_NAME)s"},
   {"action":"sudo", "params":"/etc/init.d/nginx restart", "message":"Restarting nginx"},
+
+  # Run collectstatic and syncdb
+  {"action":"run", "params":"python manage.py collectstatic -v 0 --noinput"},
+  {"action":"run", "params":"python manage.py syncdb"},
 
 
   # Setup supervisor
@@ -159,9 +167,8 @@ deploy = [
   {"action":"run", "params":"git --git-dir=webapps/amazon_app/.git pull"},
 
   # Update the database
-  {"action":"run", "params":"workon %(PROJECT_NAME)s"},
-  {"action":"run", "params":"python manage.py collectstatic -v 0 --noinput"},
-  {"action":"run", "params":"python manage.py syncdb"},
+  {"action":"virtualenv", "params":"python manage.py collectstatic -v 0 --noinput"},
+  {"action":"virtualenv", "params":"python manage.py syncdb"},
 
   # Restart gunicorn to update the site
   {"action":"sudo", "params": "supervisorctl restart %(PROJECT_NAME)s"}
