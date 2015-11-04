@@ -25,7 +25,7 @@ See an [example here](https://github.com/ashokfernandez/Django-Fabric-AWS---amaz
     * **prod.txt** for your server python dependancies (add boto, django-storages and psycopg2 to this)
 
 * Create a folder where the settings.py of your Django project is located called **settings** that has four Python files in it
-    * **__init__.py**
+    * **\__init__.py**
     * **common.py** for all your common Django settings
     * **dev.py** for your local Django settings
     * **prod.py** for your server Django settings
